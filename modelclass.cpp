@@ -2,6 +2,7 @@
 #include <QJniObject>
 #include <QGuiApplication>
 #include <QDebug>
+#include <QJsonDocument>
 
 ModelClass* current = nullptr;
 
@@ -61,20 +62,15 @@ QHash<int, QByteArray> ModelClass::roleNames() const
     return roleNames;
 }
 
-void ModelClass::populate(QStringList data)
+void ModelClass::populate(std::list<Contact> data)
 {
+    beginResetModel();
     if(contactList.isEmpty()) {
-
-        beginResetModel();
-        for(QString &contact: data) {
-            QStringList nameAndNumber = contact.split(" : ");
-            QString name = nameAndNumber.at(0);
-            QString number = nameAndNumber.at(1);
-            Contact currentContact = Contact(name,number);
-            contactList.append(currentContact);
-        }
-        endResetModel();
+        for(Contact &contact: data) {
+            contactList.append(contact);
+        }      
     }
+    endResetModel();
 }
 
 void ModelClass::getContacts()
@@ -90,25 +86,21 @@ void ModelClass::getContacts()
 extern "C" {
 #endif
 JNIEXPORT void JNICALL
-Java_com_example_contactsPicker_MainActivity_getContactsJNI(JNIEnv *env, jobject obj, jobject jlist) {
+Java_com_example_contactsPicker_MainActivity_getContactsJNI(JNIEnv *env, jobject obj, jstring jsonContacts) {
 
-    QStringList qstrList;
+    QVariantList qJsonDoc = QJsonDocument::fromJson(env->GetStringUTFChars(jsonContacts,0)).toVariant().toList();
 
-    jclass listClass = env->GetObjectClass(jlist);
-    jmethodID sizeMethod = env->GetMethodID(listClass, "size", "()I");
-    jmethodID getMethod = env->GetMethodID(listClass, "get", "(I)Ljava/lang/Object;");
-    jint size = env->CallIntMethod(jlist, sizeMethod);
+    std::list<Contact> contacts;
 
-    for (jint i = 0; i < size; i++) {
-        jstring jstr = (jstring) env->CallObjectMethod(jlist, getMethod, i);
-        const char *cstr = env->GetStringUTFChars(jstr, nullptr);
-        QString qstr = QString::fromUtf8(cstr);
-        env->ReleaseStringUTFChars(jstr, cstr);
-        qstrList.append(qstr);
+    QVariantList::iterator iter;
+    for(iter = qJsonDoc.begin(); iter != qJsonDoc.end(); iter++)
+    {
+        QVariantMap contactMap = (*iter).toMap();
+        QString name = contactMap["name"].toString();
+        QString number = contactMap["number"].toString();
+        contacts.push_back(Contact(name, number));
     }
-
-    current->populate(qstrList);
-
+    current->populate(contacts);
 }
 
 #ifdef __cplusplus

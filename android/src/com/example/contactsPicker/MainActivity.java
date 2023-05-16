@@ -6,7 +6,11 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.qtproject.qt.android.bindings.QtActivity;
 
 import java.util.ArrayList;
@@ -16,7 +20,7 @@ public class MainActivity extends QtActivity {
 
     private static final int PERMISSIONS_REQUEST_CODE = 105;
 
-    public native void getContactsJNI(List<String> object);
+    public native void getContactsJNI(String contactsJson);
 
     private void requestAppPermissions() {
         String[] permissions = new String[]{
@@ -38,7 +42,7 @@ public class MainActivity extends QtActivity {
 
 
     public void getContacts() {
-        List<String> contactsList = new ArrayList<>();
+        List<JSONObject> contactsList = new ArrayList<>();
         String[] projection = new String[]{
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.NUMBER
@@ -55,13 +59,25 @@ public class MainActivity extends QtActivity {
             while (cursor.moveToNext()) {
                 @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 @SuppressLint("Range") String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                String contact = name + " : " + number;
+
+                JSONObject contact = new JSONObject();
+
+                try {
+                    contact.put("name",name);
+                    contact.put("number",number);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+
                 contactsList.add(contact);
             }
             cursor.close();
         }
 
-        getContactsJNI(contactsList);
+        JSONArray contactsArray = new JSONArray(contactsList);
+        String contactsJsonString = contactsArray.toString();
+
+        getContactsJNI(contactsJsonString);
     }
 
 

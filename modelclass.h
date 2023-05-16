@@ -27,7 +27,7 @@ public:
     // My methods:
     virtual QHash<int, QByteArray> roleNames() const override;
 
-    void populate(QStringList data);
+    void populate(std::list<Contact> data);
 
     QList<Contact> contactList;
 

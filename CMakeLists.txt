@@ -38,6 +38,13 @@ android/build.gradle
 android/src/com/example/contactsPicker/MainActivity.java
 )
 
+if(ANDROID)
+set_property(TARGET Qt::Core APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS
+QT_ANDROID_EXPORTED_TARGET=appcontactsPicker)
+set_property(TARGET Qt::Core APPEND PROPERTY INTERFACE_COMPILE_FEATURES
+cxx_std_17)
+endif()
+
 target_link_libraries(appcontactsPicker
     PRIVATE Qt6::Quick
 )

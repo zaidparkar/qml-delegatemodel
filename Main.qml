@@ -1,11 +1,8 @@
 import QtQuick
 import ModelClass
 
-
 Window {
     id: root
-    width: 640
-    height: 480
     visible: true
 
 
@@ -22,26 +19,26 @@ Window {
             Rectangle {
                 width: root.width
                 border{width: 1}
-                height: 40
+                height: 30
                 Row {
                     spacing: 50
                     anchors.centerIn: parent
 
                     Text {
                         text: model.name
-                        font.pixelSize: 18
+                        font.pixelSize: 14
                     }
 
                     Text {
                         text: model.number
-                        font.pixelSize: 18
+                        font.pixelSize: 14
                         horizontalAlignment: Text.AlignHCenter
                     }
                 }
             }
         }
 
-        ModelClass {
+        ContactClass {
             id: mymodel
         }
 
@@ -66,7 +63,6 @@ Window {
         MouseArea  {
             anchors.fill: parent
             onClicked: {
-                console.log("Clicked")
                 mymodel.getContacts();
             }
         }

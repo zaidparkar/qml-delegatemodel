@@ -3,7 +3,7 @@
 #include <QQmlApplicationEngine>
 
 void registerTypes() {
-    qmlRegisterType<ModelClass>("ModelClass",1,0,"ModelClass");
+    qmlRegisterType<ModelClass>("ModelClass",1,0,"ContactClass");
 }
 
 
