@@ -73,6 +73,18 @@ void ModelClass::populate(std::list<Contact> data)
     endResetModel();
 }
 
+void ModelClass::removeContact(std::list<Contact> data) {
+    for(Contact &contact : data) {
+        QList<Contact>::iterator iter = std::find(contactList.begin(), contactList.end(), contact);
+        const auto index = std::distance(contactList.begin(), iter);
+        if(index < contactList.size()){
+            beginRemoveRows(QModelIndex(), index, index);
+            contactList.removeAt(index);
+            endRemoveRows();
+        }
+    }
+}
+
 void ModelClass::getContacts()
 {
     QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
