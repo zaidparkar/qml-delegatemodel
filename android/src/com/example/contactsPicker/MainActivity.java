@@ -1,2 +1,77 @@
-package com.example.contactsPicker;public class MainActivity {
+package com.example.contactsPicker;
+
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.provider.ContactsContract;
+
+import org.qtproject.qt.android.bindings.QtActivity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends QtActivity {
+
+    private static final int PERMISSIONS_REQUEST_CODE = 105;
+
+    public native void getContactsJNI(List<String> object);
+
+    private void requestAppPermissions() {
+        String[] permissions = new String[]{
+                Manifest.permission.READ_CONTACTS,
+                Manifest.permission.WRITE_CONTACTS
+        };
+        boolean permissionsGranted = true;
+        for (String permission : permissions) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionsGranted = false;
+                break;
+            }
+        }
+        if (!permissionsGranted) {
+            requestPermissions(permissions, PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+
+
+    public void getContacts() {
+        List<String> contactsList = new ArrayList<>();
+        String[] projection = new String[]{
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER
+        };
+        String sortOrder = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC";
+
+        Cursor cursor = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection,
+                    null, null, sortOrder);
+        }
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                @SuppressLint("Range") String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                String contact = name + " : " + number;
+                contactsList.add(contact);
+            }
+            cursor.close();
+        }
+
+        getContactsJNI(contactsList);
+    }
+
+
+    public void callGetContacts() {
+        getContacts();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestAppPermissions();
+    }
 }
