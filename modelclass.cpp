@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QJsonDocument>
 
+
 ModelClass* current = nullptr;
 
 ModelClass::ModelClass(QObject *parent)
@@ -70,17 +71,22 @@ void ModelClass::populate(std::list<Contact> data)
             contactList.append(contact);
         }      
     }
+    else {
+
+    }
     endResetModel();
 }
 
-void ModelClass::removeContact(std::list<Contact> data) {
-    for(Contact &contact : data) {
-        QList<Contact>::iterator iter = std::find(contactList.begin(), contactList.end(), contact);
-        const auto index = std::distance(contactList.begin(), iter);
-        if(index < contactList.size()){
-            beginRemoveRows(QModelIndex(), index, index);
-            contactList.removeAt(index);
-            endRemoveRows();
+void ModelClass::removeContact(Contact toDelete) {
+    int index = 0;
+    for(auto iter=contactList.begin(); iter!=contactList.end();iter++,index++) {
+        if(iter->getName() == toDelete.getName()) {
+            if(iter->getNumber() == toDelete.getNumber()) {
+                beginRemoveRows(QModelIndex(), index, index);
+                contactList.removeAt(index);
+                endRemoveRows();
+                break;
+            }
         }
     }
 }
@@ -91,7 +97,51 @@ void ModelClass::getContacts()
     javaClass.callMethod<void>("callGetContacts","()V");
 }
 
+JNIEnv* getJNIEnv()
+{
+    JNIEnv* env = nullptr;
+    JavaVM* jvm = QJniEnvironment::javaVM();
+    jint result = jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    if (result == JNI_OK)
+        return env;
 
+    JavaVMAttachArgs attachArgs;
+    attachArgs.version = JNI_VERSION_1_6;
+    attachArgs.name = "NativeThread";
+    attachArgs.group = nullptr;
+
+    result = jvm->AttachCurrentThread(&env, &attachArgs);
+    if (result == JNI_OK)
+        return env;
+
+    return nullptr;
+}
+
+void ModelClass::deleteContact(QString name, QString number)
+{
+    Contact toDelete = Contact(name,number);
+    removeContact(toDelete);
+
+//    JNIEnv* env = getJNIEnv();
+//    jstring jname = env->NewStringUTF(name.toUtf8().constData());
+//    jstring jnumber = env->NewStringUTF(number.toUtf8().constData());
+
+//    QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
+    //    javaClass.callMethod<void>("deleteContactFromPhone","(Ljava/lang/String;Ljava/lang/String;)V",jname,jnumber);
+}
+
+void ModelClass::modifyContact(QString oldName, QString oldNumber, QString newName, QString newNumber)
+{
+    JNIEnv* env = getJNIEnv();
+    jstring joldName = env->NewStringUTF(oldName.toUtf8().constData());
+    jstring joldNumber = env->NewStringUTF(oldNumber.toUtf8().constData());
+    jstring jnewName = env->NewStringUTF(newName.toUtf8().constData());
+    jstring jnewNumber = env->NewStringUTF(newNumber.toUtf8().constData());
+
+    QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
+    javaClass.callMethod<void>("updateContacts","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",joldName,joldNumber,jnewName,jnewNumber);
+
+}
 
 
 #ifdef __cplusplus
@@ -112,6 +162,7 @@ Java_com_example_contactsPicker_MainActivity_getContactsJNI(JNIEnv *env, jobject
         QString number = contactMap["number"].toString();
         contacts.push_back(Contact(name, number));
     }
+    current->contactList.clear();
     current->populate(contacts);
 }
 

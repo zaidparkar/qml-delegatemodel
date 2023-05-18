@@ -28,12 +28,14 @@ public:
     virtual QHash<int, QByteArray> roleNames() const override;
 
     void populate(std::list<Contact> data);
-    void removeContact(std::list<Contact> data);
+    void removeContact(Contact toDelete);
 
     QList<Contact> contactList;
 
 public slots:
     void getContacts();
+    void deleteContact(QString name, QString number);
+    void modifyContact(QString oldName, QString oldNumber, QString newName, QString newNumber);
 
 private:
 };

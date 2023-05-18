@@ -24,7 +24,7 @@ Window {
         ListView {
             id: list
             width: parent.width
-            height: 350
+            height: 480
             anchors{topMargin: 5;}
             clip: true
             spacing: 4
@@ -143,6 +143,29 @@ Window {
                 MouseArea  {
                     anchors.fill: parent
                     onClicked: {
+                        mymodel.modifyContact(currentName.toString(),currentNumber.toString(),nameTextInput.text.toString(),numberTextInput.text.toString())
+                        mymodel.getContacts();
+                        navigateTo(page1)
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 200
+                height: 60
+                anchors{topMargin: 10}
+                border {
+                    width: 1
+                    color: "black"
+                }
+                Text {
+                    anchors{centerIn: parent}
+                    text: qsTr("Delete Contact")
+                }
+                MouseArea  {
+                    anchors.fill: parent
+                    onClicked: {
+                        mymodel.deleteContact(nameTextInput.text.toString(),numberTextInput.text.toString())
                         root.navigateTo(page1)
                     }
                 }
@@ -168,6 +191,10 @@ Window {
                 }
             }
         }
+    }
+
+    Component.onCompleted: {
+        mymodel.getContacts()
     }
 }
 
