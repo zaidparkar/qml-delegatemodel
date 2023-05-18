@@ -24,6 +24,7 @@ import java.util.Random;
 public class MainActivity extends QtActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
+    private static final int CONTACTS_TO_CREATE = 100;
     private boolean PERMISSIONS = true;
 
     public native void getContactsJNI(String contactsJson);
@@ -133,43 +134,47 @@ public class MainActivity extends QtActivity {
 
     public void createContacts() {
 
-        for(int i=0; i<10; i++){
-            String name = generateRandomName();
-            String number = randomPhoneNumber();
-            ArrayList<ContentProviderOperation> cpo
-                    = new ArrayList<>();
+        List<JSONObject> allContacts = getFullContacts();
+        if(!(allContacts.size() >= CONTACTS_TO_CREATE)) {
+            for(int i=0; i<CONTACTS_TO_CREATE; i++){
+                String name = generateRandomName();
+                String number = randomPhoneNumber();
+                ArrayList<ContentProviderOperation> cpo
+                        = new ArrayList<>();
 
-            cpo.add(ContentProviderOperation.newInsert(
-                            ContactsContract.RawContacts.CONTENT_URI)
-                    .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
-                    .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
-                    .build());
+                cpo.add(ContentProviderOperation.newInsert(
+                                ContactsContract.RawContacts.CONTENT_URI)
+                        .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                        .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                        .build());
 
-            // Adding Name
-            cpo.add(ContentProviderOperation
-                    .newInsert(ContactsContract.Data.CONTENT_URI)
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                    .withValue(ContactsContract.Data.MIMETYPE,
-                            ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, ""+name)
-                    .build());
+                // Adding Name
+                cpo.add(ContentProviderOperation
+                        .newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                        .withValue(ContactsContract.Data.MIMETYPE,
+                                ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, ""+name)
+                        .build());
 
-            // Adding Number
-            cpo.add(ContentProviderOperation
-                    .newInsert(ContactsContract.Data.CONTENT_URI)
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                    .withValue(ContactsContract.Data.MIMETYPE,
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
-                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, ""+number)
-                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
-                            ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
-                    .build());
-            try {
-                getContentResolver().applyBatch(ContactsContract.AUTHORITY, cpo);
-            } catch (OperationApplicationException | RemoteException e) {
-                e.printStackTrace();
+                // Adding Number
+                cpo.add(ContentProviderOperation
+                        .newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                        .withValue(ContactsContract.Data.MIMETYPE,
+                                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, ""+number)
+                        .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                                ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                        .build());
+                try {
+                    getContentResolver().applyBatch(ContactsContract.AUTHORITY, cpo);
+                } catch (OperationApplicationException | RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         }
+
     }
 
     public void updateContacts(String oldName, String oldNumber, String newName, String newNumber) {
