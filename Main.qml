@@ -36,15 +36,18 @@ Window {
                     border{width: 1}
                     height: 30
                     Row {
-                        spacing: 50
+                        spacing: 40
                         anchors.centerIn: parent
 
                         Text {
+                            width: 120
                             text: model.name
                             font.pixelSize: 14
+                            horizontalAlignment: Text.AlignLeft
                         }
 
                         Text {
+                            width: 120
                             text: model.number
                             font.pixelSize: 14
                             horizontalAlignment: Text.AlignHCenter
