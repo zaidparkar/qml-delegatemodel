@@ -94,7 +94,7 @@ void ModelClass::removeContact(Contact toDelete) {
 void ModelClass::getContacts()
 {
     QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
-    javaClass.callMethod<void>("callGetContacts","()V");
+    javaClass.callMethod<void>("getContacts","()V");
 }
 
 JNIEnv* getJNIEnv()
@@ -119,15 +119,12 @@ JNIEnv* getJNIEnv()
 
 void ModelClass::deleteContact(QString name, QString number)
 {
-    Contact toDelete = Contact(name,number);
-    removeContact(toDelete);
+    JNIEnv* env = getJNIEnv();
+    jstring jname = env->NewStringUTF(name.toUtf8().constData());
+    jstring jnumber = env->NewStringUTF(number.toUtf8().constData());
 
-//    JNIEnv* env = getJNIEnv();
-//    jstring jname = env->NewStringUTF(name.toUtf8().constData());
-//    jstring jnumber = env->NewStringUTF(number.toUtf8().constData());
-
-//    QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
-    //    javaClass.callMethod<void>("deleteContactFromPhone","(Ljava/lang/String;Ljava/lang/String;)V",jname,jnumber);
+    QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
+    javaClass.callMethod<void>("deleteContactFromPhone","(Ljava/lang/String;Ljava/lang/String;)V",jname,jnumber);
 }
 
 void ModelClass::modifyContact(QString oldName, QString oldNumber, QString newName, QString newNumber)

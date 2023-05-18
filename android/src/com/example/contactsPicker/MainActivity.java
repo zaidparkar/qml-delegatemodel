@@ -24,7 +24,7 @@ import java.util.Random;
 public class MainActivity extends QtActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int CONTACTS_TO_CREATE = 100;
+    private static final int CONTACTS_TO_CREATE = 50;
     private boolean PERMISSIONS = true;
 
     public native void getContactsJNI(String contactsJson);
@@ -87,26 +87,6 @@ public class MainActivity extends QtActivity {
         String contactsJsonString = contactsArray.toString();
 
         getContactsJNI(contactsJsonString);
-    }
-
-
-    /*public void deleteContactFromPhone(String name, String number) {
-
-        String name = "Alpha";
-        String number = "+81 122-22-2222";
-        Log.d("","Name received: " + name + "\n" + "Number received: " + number);
-        String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " = ? AND " + ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?";
-        String[] selectionArgs = new String[]{name, number};
-        getContentResolver().delete(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, selection, selectionArgs);
-
-        List<JSONObject> contactsList = getFullContacts();
-        JSONArray contactsArray = new JSONArray(contactsList);
-        String contactsJsonString = contactsArray.toString();
-        getContactsJNI(contactsJsonString);
-    }*/
-
-    public void callGetContacts() {
-        getContacts();
     }
 
     public String generateRandomName() {
@@ -206,6 +186,20 @@ public class MainActivity extends QtActivity {
         }
     }
 
+    public void deleteContactFromPhone(String name, String number) {
+
+        ArrayList<ContentProviderOperation> cpo = new ArrayList<>();
+
+        cpo.add(ContentProviderOperation.newDelete(ContactsContract.RawContacts.CONTENT_URI)
+                .withSelection(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY + " = ?",new String[]{name})
+                .build());
+
+        try {
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, cpo);
+        } catch (OperationApplicationException | RemoteException e) {
+            e.printStackTrace();
+        }
+}
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

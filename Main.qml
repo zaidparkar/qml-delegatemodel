@@ -169,6 +169,7 @@ Window {
                     anchors.fill: parent
                     onClicked: {
                         mymodel.deleteContact(nameTextInput.text.toString(),numberTextInput.text.toString())
+                        mymodel.getContacts()
                         root.navigateTo(page1)
                     }
                 }
