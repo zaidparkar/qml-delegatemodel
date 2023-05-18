@@ -1,4 +1,4 @@
-#include "modelclass.h"
+#include "ModelClass.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 

@@ -10,9 +10,9 @@ qt_standard_project_setup()
 
 qt_add_executable(appcontactsPicker
     main.cpp
-    modelclass.h
-    modelclass.cpp
-    contactClass.cpp
+    ModelClass.h
+    ModelClass.cpp
+    ContactClass.cpp
 )
 
 qt_add_qml_module(appcontactsPicker

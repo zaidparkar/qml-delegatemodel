@@ -24,7 +24,7 @@ import java.util.Random;
 public class MainActivity extends QtActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int CONTACTS_TO_CREATE = 5;
+    private static final int CONTACTS_TO_CREATE = 200;
     private boolean PERMISSIONS = true;
 
     public native void getContactsJNI(String contactsJson);

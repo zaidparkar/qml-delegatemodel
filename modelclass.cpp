@@ -1,4 +1,4 @@
-#include "modelclass.h"
+#include "ModelClass.h"
 #include <QJniObject>
 #include <QGuiApplication>
 #include <QDebug>

@@ -2,7 +2,7 @@
 #define MODELCLASS_H
 
 #include <QAbstractListModel>
-#include "contactClass.cpp"
+#include "ContactClass.cpp"
 
 class ModelClass : public QAbstractListModel
 {
