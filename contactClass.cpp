@@ -3,11 +3,13 @@
 class Contact{
 
 private:
+    QString id;
     QString name;
     QString number;
 
 public:
-    Contact(const QString &name, const QString &number) {
+    Contact(const QString &id, const QString &name, const QString &number) {
+        this->id = id;
         this->name = name;
         this->number = number;
     }
@@ -26,5 +28,13 @@ public:
 
     void setNumber(const QString &newNumber) {
         number = newNumber;
+    }
+
+    QString getId() const {
+        return id;
+    }
+
+    void setId(const QString &newId) {
+        id = newId;
     }
 };

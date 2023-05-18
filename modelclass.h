@@ -12,6 +12,7 @@ public:
     explicit ModelClass(QObject *parent = nullptr);
 
     enum {
+        IDRole,
         NameRole = Qt::UserRole,
         NumberRole
     };
@@ -34,8 +35,8 @@ public:
 
 public slots:
     void getContacts();
-    void deleteContact(QString name, QString number);
-    void modifyContact(QString oldName, QString oldNumber, QString newName, QString newNumber);
+    void deleteContact(QString id);
+    void modifyContact(QString id, QString newName, QString newNumber);
 
 private:
 };

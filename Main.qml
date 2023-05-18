@@ -6,6 +6,7 @@ Window {
     visible: true
 
     property var currentPage: page1;
+    property string currentID: ""
     property string currentName: ""
     property string currentNumber: ""
 
@@ -56,6 +57,7 @@ Window {
                     MouseArea {
                         anchors{fill: parent}
                         onClicked: {
+                            currentID = model.id
                             currentName = model.name
                             currentNumber = model.number
                             root.navigateTo(page2)
@@ -146,9 +148,9 @@ Window {
                 MouseArea  {
                     anchors.fill: parent
                     onClicked: {
-                        mymodel.modifyContact(currentName.toString(),currentNumber.toString(),nameTextInput.text.toString(),numberTextInput.text.toString())
-                        mymodel.getContacts();
-                        navigateTo(page1)
+                        mymodel.modifyContact(currentID.toString(),nameTextInput.text.toString(),numberTextInput.text.toString())
+                        mymodel.getContacts()
+                        root.navigateTo(page1)
                     }
                 }
             }
@@ -168,7 +170,7 @@ Window {
                 MouseArea  {
                     anchors.fill: parent
                     onClicked: {
-                        mymodel.deleteContact(nameTextInput.text.toString(),numberTextInput.text.toString())
+                        mymodel.deleteContact(currentID.toString())
                         mymodel.getContacts()
                         root.navigateTo(page1)
                     }

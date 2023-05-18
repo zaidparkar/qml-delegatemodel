@@ -28,6 +28,8 @@ QVariant ModelClass::data(const QModelIndex &index, int role) const
         return QVariant();
 
     switch (role) {
+    case IDRole:
+        return QVariant(contactList.at(index.row()).getId());
     case NameRole:
         return QVariant(contactList.at(index.row()).getName());
     case NumberRole:
@@ -42,12 +44,13 @@ bool ModelClass::setData(const QModelIndex &index, const QVariant &value, int ro
     if(index.isValid()) {
         if (data(index, role) != value) {
             switch (role) {
+            case IDRole:
+                contactList[index.row()].setId(value.toString());
             case NameRole:
                 contactList[index.row()].setName(value.toString());
             case NumberRole:
                 contactList[index.row()].setNumber(value.toString());
             }
-
             emit dataChanged(index, index, {role});
             return true;
         }
@@ -58,6 +61,7 @@ bool ModelClass::setData(const QModelIndex &index, const QVariant &value, int ro
 QHash<int, QByteArray> ModelClass::roleNames() const
 {
     QHash<int, QByteArray> roleNames;
+    roleNames [IDRole] = "id";
     roleNames [NameRole] = "name";
     roleNames [NumberRole] = "number";
     return roleNames;
@@ -70,9 +74,6 @@ void ModelClass::populate(std::list<Contact> data)
         for(Contact &contact: data) {
             contactList.append(contact);
         }      
-    }
-    else {
-
     }
     endResetModel();
 }
@@ -117,26 +118,24 @@ JNIEnv* getJNIEnv()
     return nullptr;
 }
 
-void ModelClass::deleteContact(QString name, QString number)
+void ModelClass::deleteContact(QString id)
 {
     JNIEnv* env = getJNIEnv();
-    jstring jname = env->NewStringUTF(name.toUtf8().constData());
-    jstring jnumber = env->NewStringUTF(number.toUtf8().constData());
+    jstring jID = env->NewStringUTF(id.toUtf8().constData());
 
     QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
-    javaClass.callMethod<void>("deleteContactFromPhone","(Ljava/lang/String;Ljava/lang/String;)V",jname,jnumber);
+    javaClass.callMethod<void>("deleteContactFromPhone","(Ljava/lang/String;)V",jID);
 }
 
-void ModelClass::modifyContact(QString oldName, QString oldNumber, QString newName, QString newNumber)
+void ModelClass::modifyContact(QString id, QString newName, QString newNumber)
 {
     JNIEnv* env = getJNIEnv();
-    jstring joldName = env->NewStringUTF(oldName.toUtf8().constData());
-    jstring joldNumber = env->NewStringUTF(oldNumber.toUtf8().constData());
+    jstring jID = env->NewStringUTF(id.toUtf8().constData());
     jstring jnewName = env->NewStringUTF(newName.toUtf8().constData());
     jstring jnewNumber = env->NewStringUTF(newNumber.toUtf8().constData());
 
     QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
-    javaClass.callMethod<void>("updateContacts","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",joldName,joldNumber,jnewName,jnewNumber);
+    javaClass.callMethod<void>("updateContacts","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",jID,jnewName,jnewNumber);
 
 }
 
@@ -155,9 +154,10 @@ Java_com_example_contactsPicker_MainActivity_getContactsJNI(JNIEnv *env, jobject
     for(iter = qJsonDoc.begin(); iter != qJsonDoc.end(); iter++)
     {
         QVariantMap contactMap = (*iter).toMap();
+        QString id = contactMap["id"].toString();
         QString name = contactMap["name"].toString();
         QString number = contactMap["number"].toString();
-        contacts.push_back(Contact(name, number));
+        contacts.push_back(Contact(id,name, number));
     }
     current->contactList.clear();
     current->populate(contacts);

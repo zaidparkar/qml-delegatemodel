@@ -24,7 +24,7 @@ import java.util.Random;
 public class MainActivity extends QtActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int CONTACTS_TO_CREATE = 50;
+    private static final int CONTACTS_TO_CREATE = 5;
     private boolean PERMISSIONS = true;
 
     public native void getContactsJNI(String contactsJson);
@@ -48,6 +48,7 @@ public class MainActivity extends QtActivity {
     public List<JSONObject> getFullContacts() {
         List<JSONObject> contactsList = new ArrayList<>();
         String[] projection = new String[]{
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.NUMBER
         };
@@ -61,12 +62,14 @@ public class MainActivity extends QtActivity {
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
+                @SuppressLint("Range") String id = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
                 @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 @SuppressLint("Range") String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
                 JSONObject contact = new JSONObject();
 
                 try {
+                    contact.put("id",id);
                     contact.put("name",name);
                     contact.put("number",number);
                 } catch (JSONException e) {
@@ -101,7 +104,6 @@ public class MainActivity extends QtActivity {
 
         return name.toString();
     }
-
     public String randomPhoneNumber() {
         Random random = new Random();
         StringBuilder phoneNumber = new StringBuilder();
@@ -157,25 +159,23 @@ public class MainActivity extends QtActivity {
 
     }
 
-    public void updateContacts(String oldName, String oldNumber, String newName, String newNumber) {
+    public void updateContacts(String id, String newName, String newNumber) {
 
         ArrayList<ContentProviderOperation> cpo = new ArrayList<>();
 
-        // update number
+//      update number
         cpo.add(ContentProviderOperation
                 .newUpdate(ContactsContract.Data.CONTENT_URI)
-                .withSelection(ContactsContract.Data.DISPLAY_NAME + " = ? AND " +
-                        ContactsContract.Data.MIMETYPE + " = ? AND " + ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?"
-                        ,new String[] {oldName, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,oldNumber})
+                .withSelection(ContactsContract.Data.CONTACT_ID + " = ?",new String[] {id})
                 .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER,""+newNumber)
                 .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
                 .build());
 
-        // update name
+//      update name
         cpo.add(ContentProviderOperation
                 .newUpdate(ContactsContract.Data.CONTENT_URI)
-                .withSelection(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME + " = ? AND " +
-                        ContactsContract.Data.MIMETYPE + " = ?",new String[] {oldName, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE})
+                .withSelection(ContactsContract.Data.CONTACT_ID + " = ? AND " +
+                        ContactsContract.Data.MIMETYPE + " = ?",new String[] {id, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE})
                 .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,""+newName)
                 .build());
 
@@ -186,12 +186,13 @@ public class MainActivity extends QtActivity {
         }
     }
 
-    public void deleteContactFromPhone(String name, String number) {
+    public void deleteContactFromPhone(String id) {
 
         ArrayList<ContentProviderOperation> cpo = new ArrayList<>();
 
-        cpo.add(ContentProviderOperation.newDelete(ContactsContract.RawContacts.CONTENT_URI)
-                .withSelection(ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY + " = ?",new String[]{name})
+        cpo.add(ContentProviderOperation
+                .newDelete(ContactsContract.RawContacts.CONTENT_URI)
+                .withSelection(ContactsContract.RawContacts.CONTACT_ID + " = ?",new String[] {id})
                 .build());
 
         try {
