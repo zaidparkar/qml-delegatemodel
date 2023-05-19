@@ -136,7 +136,6 @@ void ModelClass::modifyContact(QString id, QString newName, QString newNumber)
 
     QJniObject javaClass = QNativeInterface::QAndroidApplication::context();
     javaClass.callMethod<void>("updateContacts","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",jID,jnewName,jnewNumber);
-
 }
 
 

@@ -19,42 +19,82 @@ Window {
         currentPage.visible = true
     }
 
+    function getRandomColor() {
+        var letters = "0123456789ABCDEF";
+        var color = "#";
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
     Item {
         id: page1
-        anchors{fill: parent}
+        anchors{fill: parent;margins: 15}
+
+        Rectangle {
+
+            id: appName
+            border{width: 1}
+            width: parent.width
+            height: 30
+
+            Text {
+                anchors{centerIn: parent}
+                font{pixelSize: 20;bold:true}
+                text: "Contacts App"
+            }
+        }
+
         ListView {
             id: list
             width: parent.width
             height: 480
-            anchors{topMargin: 5;}
+            anchors{top: appName.bottom; topMargin: 10}
             clip: true
             spacing: 4
 
             Component {
                 id: tasksDelegate
-                Rectangle {
-                    width: root.width
-                    border{width: 1}
-                    height: 30
+
+                Item{
+                    id: itemWrapper
+                    width: list.width
+                    height: 35
+
                     Row {
-                        spacing: 40
-                        anchors.centerIn: parent
+                        spacing: 20
 
-                        Text {
-                            width: 120
-                            text: model.name
-                            font.pixelSize: 14
-                            horizontalAlignment: Text.AlignLeft
+                        Rectangle {
+                            width: 35
+                            height: itemWrapper.height
+                            color: getRandomColor()
+                            radius: width/2
+
+                            Text {
+                                anchors{centerIn: parent}
+                                font{pixelSize: 16}
+                                color: "white"
+                                text: model.name.charAt(0).toUpperCase()
+                            }
                         }
 
-                        Text {
-                            width: 120
-                            text: model.number
-                            font.pixelSize: 14
-                            horizontalAlignment: Text.AlignHCenter
+                        Rectangle {
+                            width: theNameOfContact.contentWidth
+                            border{width: 1}
+                            height: itemWrapper.height
+
+                            Text {
+                                id: theNameOfContact
+                                text: model.name
+                                font.pixelSize: 18
+                                anchors{verticalCenter: parent.verticalCenter}
+                            }
                         }
+
                     }
                     MouseArea {
+                        id: contactPageMouseArea
                         anchors{fill: parent}
                         onClicked: {
                             currentID = model.id
@@ -63,6 +103,31 @@ Window {
                             root.navigateTo(page2)
                         }
                     }
+
+
+
+
+                    Rectangle {
+                        id: effectWrapper
+
+                        anchors{fill: parent}
+                        radius: width/2
+                        color: contactPageMouseArea.containsMouse ? "lightgray" : "transparent"
+                        opacity: contactPageMouseArea.containsMouse ? 0.5 : 1.0
+
+                        states: [
+                            State {
+                                name: "pressed"
+                                when: contactPageMouseArea.pressed
+                                PropertyChanges { target: effectWrapper; color: "gray" }
+                            }
+                        ]
+
+                        transitions: Transition {
+                            PropertyAnimation { target: effectWrapper; properties: "color"; duration: 200 }
+                        }
+                    }
+
                 }
             }
 
