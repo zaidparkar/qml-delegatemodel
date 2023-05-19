@@ -35,7 +35,6 @@ Window {
         Rectangle {
 
             id: appName
-            border{width: 1}
             width: parent.width
             height: 30
 
@@ -81,7 +80,6 @@ Window {
 
                         Rectangle {
                             width: theNameOfContact.contentWidth
-                            border{width: 1}
                             height: itemWrapper.height
 
                             Text {
@@ -100,12 +98,10 @@ Window {
                             currentID = model.id
                             currentName = model.name
                             currentNumber = model.number
+                            page2.y = 0
                             root.navigateTo(page2)
                         }
                     }
-
-
-
 
                     Rectangle {
                         id: effectWrapper
@@ -164,10 +160,13 @@ Window {
 
     Item {
         id: page2
-        anchors{fill: parent}
+        width: root.width
+        height: root.height
         visible: false
+        y: root.height
 
         Column {
+            id: allElementsPage2
             spacing: 30
             anchors{centerIn: parent}
 
@@ -257,15 +256,25 @@ Window {
                 MouseArea  {
                     anchors.fill: parent
                     onClicked: {
-                        root.navigateTo(page1)
+                        page2.y = root.height
+                        page1.visible = true
+//                        root.navigateTo(page1)
                     }
                 }
             }
         }
+
+        Behavior on y {
+            NumberAnimation {
+                duration: 200
+            }
+        }
+
     }
 
     Component.onCompleted: {
         mymodel.getContacts()
+        getButton.visible = false
     }
 }
 
