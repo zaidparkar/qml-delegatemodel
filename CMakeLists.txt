@@ -18,7 +18,7 @@ qt_add_executable(appcontactsPicker
 qt_add_qml_module(appcontactsPicker
     URI contactsPicker
     VERSION 1.0
-    QML_FILES Main.qml Page2.qml
+    QML_FILES Main.qml
 )
 
 set_target_properties(appcontactsPicker PROPERTIES

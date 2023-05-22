@@ -98,6 +98,7 @@ Window {
                             currentID = model.id
                             currentName = model.name
                             currentNumber = model.number
+                            page1.visible = false
                             page2.y = 0
                             root.navigateTo(page2)
                         }
@@ -258,7 +259,6 @@ Window {
                     onClicked: {
                         page2.y = root.height
                         page1.visible = true
-//                        root.navigateTo(page1)
                     }
                 }
             }
