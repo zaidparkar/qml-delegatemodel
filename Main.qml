@@ -48,10 +48,27 @@ Window {
         ListView {
             id: list
             width: parent.width
-            height: 480
+            height: parent.height - 30
             anchors{top: appName.bottom; topMargin: 10}
             clip: true
             spacing: 4
+
+            Component {
+                id: sectionDelegate
+                Rectangle {
+                    width: 5
+                    height: 18
+
+                    Text {
+                        font.pixelSize: 12
+                        text: section.toUpperCase()
+                    }
+                }
+            }
+
+            section.property: "name"
+            section.criteria: ViewSection.FirstCharacter
+            section.delegate: sectionDelegate
 
             Component {
                 id: tasksDelegate

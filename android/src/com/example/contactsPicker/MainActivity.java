@@ -6,11 +6,14 @@ import android.content.ContentProviderOperation;
 import android.content.OperationApplicationException;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.Toast;
+import android.database.ContentObserver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,8 +27,9 @@ import java.util.Random;
 public class MainActivity extends QtActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int CONTACTS_TO_CREATE = 10;
+    private static final int CONTACTS_TO_CREATE = 500;
     private boolean PERMISSIONS = true;
+    private ContentObserver contactObserver;
 
     public native void getContactsJNI(String contactsJson);
 
@@ -98,7 +102,12 @@ public class MainActivity extends QtActivity {
         int length = random.nextInt(5) + 5; // Random name length between 5 and 10 characters
 
         for (int i = 0; i < length; i++) {
-            char randomChar = (char) (random.nextInt(26) + 'a'); // Random lowercase letter
+            char randomChar;
+            if (i == 0) {
+                randomChar = (char) (random.nextInt(26) + 'A'); // Random uppercase letter for the first character
+            } else {
+                randomChar = (char) (random.nextInt(26) + 'a'); // Random lowercase letter for the remaining characters
+            }
             name.append(randomChar);
         }
 
@@ -211,6 +220,19 @@ public class MainActivity extends QtActivity {
         else {
             requestAppPermissions();
         }
+        contactObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                super.onChange(selfChange, uri);
+                getContacts();
+            }
+        };
+        getContentResolver().registerContentObserver(
+                ContactsContract.Contacts.CONTENT_URI,
+                true,
+                contactObserver
+        );
+
     }
 
     @Override
@@ -231,5 +253,6 @@ public class MainActivity extends QtActivity {
 
     protected void onDestroy() {
         super.onDestroy();
+        getContentResolver().unregisterContentObserver(contactObserver);
     }
 }
