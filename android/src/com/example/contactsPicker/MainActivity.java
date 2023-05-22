@@ -27,7 +27,7 @@ import java.util.Random;
 public class MainActivity extends QtActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int CONTACTS_TO_CREATE = 500;
+    private static final int CONTACTS_TO_CREATE = 50;
     private boolean PERMISSIONS = true;
     private ContentObserver contactObserver;
 

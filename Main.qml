@@ -275,6 +275,7 @@ Window {
                     anchors.fill: parent
                     onClicked: {
                         page2.y = root.height
+                        currentPage = page1
                         page1.visible = true
                     }
                 }
@@ -292,6 +293,15 @@ Window {
     Component.onCompleted: {
         mymodel.getContacts()
         getButton.visible = false
+
+        contentItem.Keys.released.connect(function(event) {
+            if (event.key === Qt.Key_Back) {
+                event.accepted = true
+                page2.y = root.height
+                currentPage = page1
+                page1.visible = true
+            }
+        })
     }
 }
 
