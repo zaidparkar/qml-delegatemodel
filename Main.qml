@@ -11,8 +11,6 @@ Window {
     property string currentNumber: ""
 
     function navigateTo(page) {
-        nameTextInput.focus = false;
-        numberTextInput.focus = false;
 
         currentPage.visible = false;
         currentPage = page
@@ -27,6 +25,9 @@ Window {
         }
         return color;
     }
+
+//ParentChange
+//Package,DelegateModel
 
     Item {
         id: page1
@@ -48,7 +49,7 @@ Window {
         ListView {
             id: list
             width: parent.width
-            height: parent.height - 30
+            height: parent.height - 30 //(getButton.height + 40)
             anchors{top: appName.bottom; topMargin: 10}
             clip: true
             spacing: 4
@@ -84,14 +85,13 @@ Window {
                         Rectangle {
                             width: 35
                             height: itemWrapper.height
-                            color: getRandomColor()
                             radius: width/2
+                            clip: true
 
-                            Text {
-                                anchors{centerIn: parent}
-                                font{pixelSize: 16}
-                                color: "white"
-                                text: model.name.charAt(0).toUpperCase()
+                            Image {
+                                id: img
+                                anchors{fill: parent; centerIn: parent}
+                                source: "assets:/cat.jpeg"
                             }
                         }
 
@@ -154,26 +154,6 @@ Window {
             delegate: tasksDelegate
         }
 
-        Rectangle {
-            id: getButton
-            width: 200
-            height: 60
-            anchors{top: list.bottom; horizontalCenter: parent.horizontalCenter; topMargin: 10}
-            border {
-                width: 1
-                color: "black"
-            }
-            Text {
-                anchors{centerIn: parent}
-                text: qsTr("Sync Contacts")
-            }
-            MouseArea  {
-                anchors.fill: parent
-                onClicked: {
-                    mymodel.getContacts();
-                }
-            }
-        }
     }
 
     Item {
@@ -188,74 +168,39 @@ Window {
             spacing: 30
             anchors{centerIn: parent}
 
-            Rectangle{
-                id: name
-                width: 200
-                height: 50
-                border{width: 1}
-                TextInput {
-                    id: nameTextInput
-                    text: currentName
-                    anchors{centerIn: parent}
-                    font{pixelSize: 18}
+            ListView {
+
+                Component {
+                    id: listDelegate
+                    Rectangle{
+                        id: name
+                        width: 200
+                        height: 50
+                        Text {
+                            id: nameTextInput
+                            text: currentName
+                            anchors{centerIn: parent}
+                            font{pixelSize: 18}
+                        }
+                    }
                 }
+
+
+
+
             }
+
+
 
             Rectangle {
                 id: number
                 width: 200
                 height: 50
-                border{width: 1}
-                TextInput {
+                Text {
                     id: numberTextInput
                     text: currentNumber
-                    inputMethodHints: Qt.ImhFormattedNumbersOnly
                     anchors{centerIn: parent}
                     font{pixelSize: 18}
-                }
-            }
-
-            Rectangle {
-                width: 200
-                height: 60
-                anchors{topMargin: 10}
-                border {
-                    width: 1
-                    color: "black"
-                }
-                Text {
-                    anchors{centerIn: parent}
-                    text: qsTr("Update Contact")
-                }
-                MouseArea  {
-                    anchors.fill: parent
-                    onClicked: {
-                        mymodel.modifyContact(currentID.toString(),nameTextInput.text.toString(),numberTextInput.text.toString())
-                        mymodel.getContacts()
-                        root.navigateTo(page1)
-                    }
-                }
-            }
-
-            Rectangle {
-                width: 200
-                height: 60
-                anchors{topMargin: 10}
-                border {
-                    width: 1
-                    color: "black"
-                }
-                Text {
-                    anchors{centerIn: parent}
-                    text: qsTr("Delete Contact")
-                }
-                MouseArea  {
-                    anchors.fill: parent
-                    onClicked: {
-                        mymodel.deleteContact(currentID.toString())
-                        mymodel.getContacts()
-                        root.navigateTo(page1)
-                    }
                 }
             }
 
@@ -292,14 +237,15 @@ Window {
 
     Component.onCompleted: {
         mymodel.getContacts()
-        getButton.visible = false
 
         contentItem.Keys.released.connect(function(event) {
             if (event.key === Qt.Key_Back) {
                 event.accepted = true
-                page2.y = root.height
-                currentPage = page1
-                page1.visible = true
+                if(currentPage == page2) {
+                    page2.y = root.height
+                    currentPage = page1
+                    page1.visible = true
+                }
             }
         })
     }

@@ -13,6 +13,7 @@ qt_add_executable(appcontactsPicker
     ModelClass.h
     ModelClass.cpp
     ContactClass.cpp
+    resources.qrc
 )
 
 qt_add_qml_module(appcontactsPicker

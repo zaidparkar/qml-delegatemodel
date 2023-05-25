@@ -78,19 +78,56 @@ void ModelClass::populate(std::list<Contact> data)
     endResetModel();
 }
 
-void ModelClass::removeContact(Contact toDelete) {
+void ModelClass::removeContact(QString contactID) {
     int index = 0;
     for(auto iter=contactList.begin(); iter!=contactList.end();iter++,index++) {
-        if(iter->getName() == toDelete.getName()) {
-            if(iter->getNumber() == toDelete.getNumber()) {
-                beginRemoveRows(QModelIndex(), index, index);
-                contactList.removeAt(index);
-                endRemoveRows();
-                break;
-            }
+        if(iter->getId() == contactID) {
+            beginRemoveRows(QModelIndex(), index, index);
+            contactList.removeAt(index);
+            endRemoveRows();
+            break;
         }
     }
 }
+
+void ModelClass::editContact(Contact toEdit)
+{
+    int oldIndex = -1;
+
+    for (int i = 0; i < contactList.size(); i++) {
+        if (contactList[i].getId() == toEdit.getId()) {
+            oldIndex = i;
+            break;
+        }
+    }
+
+    if(oldIndex>0) {
+
+        contactList.removeAt(oldIndex);
+
+        int newIndex = 0;
+        for (; newIndex < contactList.size(); ++newIndex) {
+            if (contactList[newIndex].getName().compare(toEdit.getName()) > 0) {
+                break;
+            }
+        }
+
+        if (newIndex != oldIndex) {
+
+            beginMoveRows(QModelIndex(), oldIndex, oldIndex, QModelIndex(), newIndex > oldIndex ? newIndex + 1 : newIndex);
+            contactList.insert(newIndex, toEdit);
+            endMoveRows();
+            QModelIndex contactIndex = createIndex(newIndex, 0);
+            emit dataChanged(contactIndex,contactIndex);
+        }
+        else {
+            contactList.insert(oldIndex, toEdit);
+            QModelIndex contactIndex = createIndex(oldIndex, 0);
+            emit dataChanged(contactIndex, contactIndex);
+        }
+    }
+}
+
 
 void ModelClass::getContacts()
 {
@@ -160,6 +197,38 @@ Java_com_example_contactsPicker_MainActivity_getContactsJNI(JNIEnv *env, jobject
     }
     current->contactList.clear();
     current->populate(contacts);
+}
+
+
+JNIEXPORT void JNICALL
+Java_com_example_contactsPicker_MainActivity_updateContactJNI(JNIEnv *env, jobject obj, jstring jsonContact) {
+
+    QVariantMap contactMap = QJsonDocument::fromJson(env->GetStringUTFChars(jsonContact,0)).toVariant().toMap();
+    QString id = contactMap["id"].toString();
+    QString name = contactMap["name"].toString();
+    QString number = contactMap["number"].toString();
+    Contact toEdit = Contact(id,name, number);
+
+    current->editContact(toEdit);
+}
+
+
+JNIEXPORT void JNICALL
+Java_com_example_contactsPicker_MainActivity_deleteContactJNI(JNIEnv *env, jobject obj, jobject contactIDs) {
+
+    jclass listClass = env->GetObjectClass(contactIDs);
+    jmethodID sizeMethod = env->GetMethodID(listClass,"size","()I");
+    jmethodID getMethod = env->GetMethodID(listClass,"get","(I)Ljava/lang/Object;");
+    jint size = env->CallIntMethod(contactIDs,sizeMethod);
+
+    for (jint i = 0; i < size; i++) {
+        jstring jstr = (jstring) env->CallObjectMethod(contactIDs, getMethod, i);
+        const char *cstr = env->GetStringUTFChars(jstr, nullptr);
+        QString id = QString::fromUtf8(cstr);
+        env->ReleaseStringUTFChars(jstr, cstr);
+        current->removeContact(id);
+    }
+
 }
 
 #ifdef __cplusplus

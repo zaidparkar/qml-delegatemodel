@@ -29,7 +29,8 @@ public:
     virtual QHash<int, QByteArray> roleNames() const override;
 
     void populate(std::list<Contact> data);
-    void removeContact(Contact toDelete);
+    void removeContact(QString contactID);
+    void editContact(Contact toEdit);
 
     QList<Contact> contactList;
 
