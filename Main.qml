@@ -10,27 +10,47 @@ Window {
     property string currentName: ""
     property string currentNumber: ""
 
+    //animation properties
+    property int animationDuration: 3000
+    property real initialX: 0
+    property real initialY: 0
+    property real initialWidth: 0
+    property real initialHeight: 0
+    property real scaleFactor: 1.0
+    property bool animating: false
+
+
     function navigateTo(page) {
 
-        currentPage.visible = false;
+//        currentPage.visible = false;
         currentPage = page
         currentPage.visible = true
     }
 
-    function getRandomColor() {
-        var letters = "0123456789ABCDEF";
-        var color = "#";
-        for (var i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
+    //ParentChange
+    //Package,DelegateModel
+
+    ContactClass {
+        id: mymodel
     }
 
-//ParentChange
-//Package,DelegateModel
+    DelegateModel {
+        id: visualModel
+
+        model: mymodel
+
+        delegate: Package {
+            ContactListDelegate {
+                Package.name: "contactlist"
+
+            }
+        }
+    }
+
 
     Item {
         id: page1
+        opacity: 1
         anchors{fill: parent;margins: 15}
 
         Rectangle {
@@ -48,11 +68,11 @@ Window {
 
         ListView {
             id: list
-            width: parent.width
-            height: parent.height - 30 //(getButton.height + 40)
+            width: root.width
+            height: root.height - 30
             anchors{top: appName.bottom; topMargin: 10}
             clip: true
-            spacing: 4
+            spacing: 40
 
             Component {
                 id: sectionDelegate
@@ -71,143 +91,172 @@ Window {
             section.criteria: ViewSection.FirstCharacter
             section.delegate: sectionDelegate
 
-            Component {
-                id: tasksDelegate
-
-                Item{
-                    id: itemWrapper
-                    width: list.width
-                    height: 35
-
-                    Row {
-                        spacing: 20
-
-                        Rectangle {
-                            width: 35
-                            height: itemWrapper.height
-                            radius: width/2
-                            clip: true
-
-                            Image {
-                                id: img
-                                anchors{fill: parent; centerIn: parent}
-                                source: "assets:/cat.jpeg"
-                            }
-                        }
-
-                        Rectangle {
-                            width: theNameOfContact.contentWidth
-                            height: itemWrapper.height
-
-                            Text {
-                                id: theNameOfContact
-                                text: model.name
-                                font.pixelSize: 18
-                                anchors{verticalCenter: parent.verticalCenter}
-                            }
-                        }
-
-                    }
-                    MouseArea {
-                        id: contactPageMouseArea
-                        anchors{fill: parent}
-                        onClicked: {
-                            currentID = model.id
-                            currentName = model.name
-                            currentNumber = model.number
-                            page1.visible = false
-                            page2.y = 0
-                            root.navigateTo(page2)
-                        }
-                    }
-
-                    Rectangle {
-                        id: effectWrapper
-
-                        anchors{fill: parent}
-                        radius: width/2
-                        color: contactPageMouseArea.containsMouse ? "lightgray" : "transparent"
-                        opacity: contactPageMouseArea.containsMouse ? 0.5 : 1.0
-
-                        states: [
-                            State {
-                                name: "pressed"
-                                when: contactPageMouseArea.pressed
-                                PropertyChanges { target: effectWrapper; color: "gray" }
-                            }
-                        ]
-
-                        transitions: Transition {
-                            PropertyAnimation { target: effectWrapper; properties: "color"; duration: 200 }
-                        }
-                    }
-
-                }
-            }
-
-            ContactClass {
-                id: mymodel
-            }
-
-            model: mymodel
-
-            delegate: tasksDelegate
+            model: visualModel.parts.contactlist
         }
 
+        Behavior on opacity {
+            NumberAnimation {
+                duration: root.animationDuration/2
+            }
+        }
     }
 
     Item {
         id: page2
-        width: root.width
-        height: root.height
         visible: false
-        y: root.height
+
+
+        x: root.animating ? root.initialX : 0
+        y: root.animating ? root.initialY : 0
+        scale: root.scaleFactor
+        width: 0
+        height: 0
+
+        states: [
+            State {
+                name: "default"
+                PropertyChanges {
+                    target: page2
+                    x: root.initialX
+                    y: root.initialY
+                    width: 0
+                    height: 0
+                    visible: false
+                    scale: 0
+                }
+                PropertyChanges {
+                    target: page1
+                    opacity: 1
+                    visible: true
+                }
+            },
+
+            State {
+                name: "infopage"
+//                when: currentPage == page2
+                PropertyChanges {
+                    target: page2
+                    x: 0
+                    y: 0
+                    width: root.width
+                    height: root.height
+                    visible: true
+                    scale: 1.0
+                }
+                PropertyChanges {
+                    target: page1
+                    opacity: 0
+                    visible: true
+                }
+            }
+
+        ]
+
+        transitions: [
+            Transition {
+                from: "default"
+                to: "infopage"
+                enabled: false
+
+                reversible: true
+
+                ParallelAnimation {
+                    PropertyAction {
+                        target: page1
+                        property: "opacity"
+                        value: 0
+                    }
+                    NumberAnimation {
+                        target: page2
+                        property: "x"
+                        duration: root.animationDuration
+                        easing.type: Easing.InOutQuad
+                    }
+
+                    NumberAnimation {
+                        target: page2
+                        property: "y"
+                        duration: root.animationDuration
+                        easing.type: Easing.InOutQuad
+                    }
+
+                    NumberAnimation {
+                        target: page2
+                        property: "width"
+                        duration: root.animationDuration
+                        easing.type: Easing.InOutQuad
+                    }
+
+                    NumberAnimation {
+                        target: page2
+                        property: "height"
+                        duration: root.animationDuration
+                        easing.type: Easing.InOutQuad
+                    }
+
+                    NumberAnimation {
+                        target: page2
+                        property: "scale"
+                        duration: root.animationDuration
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+            }
+
+        ]
 
         Column {
             id: allElementsPage2
+            width: root.width
             spacing: 30
             anchors{centerIn: parent}
 
-            ListView {
+            Rectangle {
+                id: imageDP
+                width: root.width
+                height: root.width
 
-                Component {
-                    id: listDelegate
-                    Rectangle{
-                        id: name
-                        width: 200
-                        height: 50
-                        Text {
-                            id: nameTextInput
-                            text: currentName
-                            anchors{centerIn: parent}
-                            font{pixelSize: 18}
-                        }
-                    }
+                Image {
+                    anchors{fill:parent}
+                    source: "assets:/cat.jpeg"
                 }
-
-
-
-
             }
 
-
-
-            Rectangle {
-                id: number
+            /*Rectangle {
+                id: name
                 width: 200
                 height: 50
+                anchors{horizontalCenter: parent.horizontalCenter}
                 Text {
-                    id: numberTextInput
-                    text: currentNumber
+                    id: nameTextInput
+                    text: currentName
                     anchors{centerIn: parent}
                     font{pixelSize: 18}
                 }
             }
 
             Rectangle {
+                id: number
+                width: 200
+                height: 50
+                anchors{horizontalCenter: parent.horizontalCenter}
+                Text {
+                    id: numberTextInput
+                    text: currentNumber
+                    anchors{centerIn: parent}
+                    font{pixelSize: 18}
+                }
+            }*/
+
+            ListView {
+
+            }
+
+            Rectangle {
                 width: 200
                 height: 60
                 anchors{topMargin: 10}
+                anchors{horizontalCenter: parent.horizontalCenter}
                 border {
                     width: 1
                     color: "black"
@@ -219,21 +268,65 @@ Window {
                 MouseArea  {
                     anchors.fill: parent
                     onClicked: {
-                        page2.y = root.height
-                        currentPage = page1
-                        page1.visible = true
+                        page2.width = 0
+                        page2.height = 0
+                        page2.scale = 0
+                        page1.opacity = 1
+                        page2.visible = false
+                        navigateTo(page1)
+
                     }
                 }
             }
         }
 
-        Behavior on y {
-            NumberAnimation {
-                duration: 200
+        onVisibleChanged: {
+            if(!page2.visible) {
+                root.animating = false
             }
         }
 
+
+        NumberAnimation on x {
+            from: root.initialX
+            to: 0
+            duration: root.animationDuration
+            easing.type: Easing.InOutQuad
+            running: root.animating
+        }
+
+        NumberAnimation on y {
+            from: root.initialY
+            to: 0
+            duration: root.animationDuration
+            easing.type: Easing.InOutQuad
+            running: root.animating
+        }
+
+        NumberAnimation on width {
+            to: root.width
+            duration: root.animationDuration
+            easing.type: Easing.InOutQuad
+            running: root.animating
+        }
+
+        NumberAnimation on height {
+            to: root.height
+            duration: root.animationDuration
+            easing.type: Easing.InOutQuad
+            running: root.animating
+        }
+
+        NumberAnimation on scale {
+            to: 1.0
+            duration: root.animationDuration
+            easing.type: Easing.InOutQuad
+            running: root.animating
+
+        }
+
     }
+
 
     Component.onCompleted: {
         mymodel.getContacts()
@@ -242,9 +335,12 @@ Window {
             if (event.key === Qt.Key_Back) {
                 event.accepted = true
                 if(currentPage == page2) {
-                    page2.y = root.height
-                    currentPage = page1
-                    page1.visible = true
+                    page2.width = 0
+                    page2.height = 0
+                    page2.scale = 0
+                    page1.opacity = 1
+                    page2.visible = false
+                    navigateTo(page1)
                 }
             }
         })

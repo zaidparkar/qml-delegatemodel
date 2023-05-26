@@ -2,4 +2,7 @@
     <qresource prefix="/resources">
         <file>android/assets/cat.jpeg</file>
     </qresource>
+    <qresource prefix="/">
+        <file>ContactListDelegate.qml</file>
+    </qresource>
 </RCC>
