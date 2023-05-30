@@ -46,33 +46,19 @@ Package {
 
 
         states: [
-            State {
-                name: "inFullList"
-                when: root.state == "inFullList"
-
-                ParentChange {target: imageDP; parent: row}
-                ParentChange {target: nameLabel; parent: row}
-                ParentChange {target: numberLabel; parent: row}
-                ParentChange {target: backButton; parent: row}
-
-                PropertyChanges {target: imageDP; width: 35; height: itemWrapper.height}
-                PropertyChanges {target: nameLabel; width: theNameOfContact.contentWidth; height: itemWrapper.height}
-                PropertyChanges {target: numberLabel; visible:false}
-                PropertyChanges {target: backButton; visible: false}
-            },
 
             State {
                 name:"inContact"
                 when: root.state == "inContact" && contactPageWrapper.ListView.view.currentIndex===index
 
-                ParentChange {target: imageDP; parent: contactColumn; width: root.width; height: root.width;x: 0; y:0}
-                ParentChange {target: nameLabel; parent: contactColumn; width: 200; height: 50;x:0;y: 140}
-                ParentChange {target: numberLabel; parent: contactColumn; width: 200; height: 50;x:0;y: 200}
+                ParentChange {target: imageDP; parent: contactColumn}
+                ParentChange {target: nameLabel; parent: contactColumn}
+                ParentChange {target: numberLabel; parent: contactColumn}
                 ParentChange {target: backButton; parent: contactColumn}
 
-                PropertyChanges {target: imageDP;}
-                PropertyChanges {target: nameLabel; width: 200; height: 100}
-                PropertyChanges {target: numberLabel;visible: true}
+                PropertyChanges {target: imageDP; width: root.width; height: root.width;x: 0; y:0}
+                PropertyChanges {target: nameLabel; width: 200; height: 100;x:0;y: 140}
+                PropertyChanges {target: numberLabel;visible: true;x:0;y: 200}
                 PropertyChanges {target: backButton; visible: true}
 
             }
@@ -111,8 +97,9 @@ Package {
 
     Rectangle {
         id: imageDP
-        width: itemWrapper.height
-        height: itemWrapper.height
+        parent: row
+        width: 35
+        height: 35
         clip: true
 
         Image {
@@ -125,6 +112,7 @@ Package {
         id: nameLabel
         width: theNameOfContact.contentWidth
         height: itemWrapper.height
+        parent: row
 
         Text {
             id: theNameOfContact
@@ -138,6 +126,7 @@ Package {
         id: numberLabel
         width: 200
         height: 100
+        parent: row
         visible: false
         Text {
             id: numberTextInput
@@ -150,6 +139,7 @@ Package {
         id: backButton
         width: 200
         height: 60
+        parent: row
         visible: false
         border {
             width: 1

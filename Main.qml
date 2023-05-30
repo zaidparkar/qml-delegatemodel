@@ -63,13 +63,6 @@ Window {
 
         state: "inFullList"
         states: [
-            /*State {
-                name: "inFullList"
-                when: root.state == "inFullList" || root.state == ""
-                PropertyChanges { target: fullView; interactive: true; visible: true }
-                PropertyChanges { target: contactView; visible: false }
-            },*/
-
             State {
                 name: "inContact"
                 when: root.state == "inContact"
