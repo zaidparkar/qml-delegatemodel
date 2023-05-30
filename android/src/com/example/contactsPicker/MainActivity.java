@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 public class MainActivity extends QtActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int CONTACTS_TO_CREATE = 100;
+    private static final int CONTACTS_TO_CREATE = 20;
     private boolean PERMISSIONS = true;
     private ContentObserver contactObserver;
     public String lastTimeSync = "0";
